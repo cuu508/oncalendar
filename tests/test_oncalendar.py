@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 from datetime import datetime
+from itertools import product
 
 from oncalendar import OnCalendar, OnCalendarError
 
@@ -145,6 +146,24 @@ class TestValidation(unittest.TestCase):
     def test_it_rejects_4_components(self) -> None:
         with self.assertRaisesRegex(OnCalendarError, "Wrong number of fields"):
             OnCalendar("Mon *-*-* *:*:* surprise", NOW)
+
+    def test_it_rejects_bad_values(self) -> None:
+        patterns = (
+            "%s *-*-* *:*:*",
+            "%s-*-*",
+            "*-%s-*",
+            "*-*-%s",
+            "*-*~%s",
+            "%s:*:*",
+            "*:%s:*",
+            "*:*:%s",
+        )
+
+        bad_values = ("-1", "1000", "ABC", "1-1", "1:1", "Mon/1")
+
+        for pattern, s in product(patterns, bad_values):
+            with self.assertRaises(OnCalendarError):
+                OnCalendar(pattern % s, NOW)
 
     def test_it_rejects_lopsided_range(self) -> None:
         with self.assertRaisesRegex(OnCalendarError, "Bad day-of-month"):

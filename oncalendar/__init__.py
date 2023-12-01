@@ -110,7 +110,7 @@ class Field(IntEnum):
                 result.update(self.parse(term, reverse=reverse))
             return result
 
-        if "/" in s:
+        if "/" in s and self != Field.DOW:
             term, step_str = s.split("/", maxsplit=1)
             step = self._int(step_str)
             if step == 0:
@@ -185,6 +185,8 @@ class OnCalendar(object):
         # If year is missing, use default
         if len(date_parts) == 2:
             date_parts.insert(0, "*")
+        if len(date_parts) != 3:
+            raise OnCalendarError("Bad date")
         self.years = Field.YEAR.parse(date_parts[0])
         self.months = Field.MONTH.parse(date_parts[1])
         self.days = Field.DAY.parse(date_parts[2])
@@ -193,6 +195,8 @@ class OnCalendar(object):
         # If seconds is missing, use default
         if len(time_parts) == 2:
             time_parts.append("0")
+        if len(time_parts) != 3:
+            raise OnCalendarError("Bad time")
         self.hours = Field.HOUR.parse(time_parts[0])
         self.minutes = Field.MINUTE.parse(time_parts[1])
         self.seconds = Field.SECOND.parse(time_parts[2])
