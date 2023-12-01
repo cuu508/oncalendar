@@ -13,7 +13,7 @@ class TestParse(unittest.TestCase):
         if "w" in fields:
             self.assertEqual(w.weekdays, set(range(0, 7)))
         if "y" in fields:
-            self.assertEqual(w.years, set(range(2000, 2200)))
+            self.assertEqual(w.years, set(range(1970, 2200)))
         if "m" in fields:
             self.assertEqual(w.months, set(range(1, 13)))
         if "d" in fields:
