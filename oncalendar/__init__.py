@@ -12,7 +12,7 @@ UTC = timezone.utc
 MAX_YEAR = 2200
 RANGES = [
     range(0, 7),
-    range(2000, MAX_YEAR),
+    range(1970, MAX_YEAR),
     range(1, 13),
     range(1, 32),
     range(0, 24),
@@ -69,6 +69,13 @@ class Field(IntEnum):
             raise OnCalendarError(self.msg())
 
         v = self._int(s)
+        if self == Field.YEAR and v < 70:
+            # Interpret 0-69 as 2000-2069
+            v += 2000
+        if self == Field.YEAR and v < 100:
+            # Interpret 70-99 as 1970-1999
+            v += 1900
+
         if v not in RANGES[self]:
             raise OnCalendarError(self.msg())
 

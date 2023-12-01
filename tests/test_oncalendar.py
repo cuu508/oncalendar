@@ -51,6 +51,16 @@ class TestParse(unittest.TestCase):
         self.assertEqual(w.months, {11})
         self.assertEqual(w.days, {30})
 
+    def test_it_handles_two_digit_year(self) -> None:
+        w = OnCalendar("69-*-*", NOW)
+        self.assert_default(w, "wmdHMS")
+        self.assertEqual(w.years, {2069})
+
+    def test_it_handles_prev_century_two_digit_year(self) -> None:
+        w = OnCalendar("70-*-*", NOW)
+        self.assert_default(w, "wmdHMS")
+        self.assertEqual(w.years, {1970})
+
     def test_it_parses_time(self) -> None:
         w = OnCalendar("11:22:33", NOW)
         self.assert_default(w, "wymd")
