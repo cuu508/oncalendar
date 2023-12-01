@@ -38,6 +38,13 @@ class TestParse(unittest.TestCase):
             self.assert_default(w, "ymdHMS")
             self.assertEqual(w.weekdays, {0})
 
+    def test_it_parses_weekday_with_trailing_comma(self) -> None:
+        w = OnCalendar("Mon, 12:34", NOW)
+        self.assert_default(w, "ymdS")
+        self.assertEqual(w.weekdays, {0})
+        self.assertEqual(w.hours, {12})
+        self.assertEqual(w.minutes, {34})
+
     def test_it_parses_date(self) -> None:
         w = OnCalendar("2023-11-30", NOW)
         self.assert_default(w, "wHMS")

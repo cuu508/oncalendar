@@ -85,7 +85,12 @@ class Field(IntEnum):
         if s == "*":
             return set(RANGES[self])
 
+        if self == Field.DOW and s.endswith(","):
+            # Ignore trailing comma
+            return self.parse(s[:-1])
+
         if self == Field.DAY and s.startswith("~"):
+            # Chop leading "~" and set the reverse flag
             return self.parse(s[1:], reverse=True)
 
         if "," in s:
