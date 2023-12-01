@@ -133,6 +133,13 @@ class TestParse(unittest.TestCase):
         w = OnCalendar("*-*~3/2", NOW)
         self.assertEqual(w.days, {-1, -3})
 
+    def test_it_parses_special_expression(self) -> None:
+        w = OnCalendar("minutely", NOW)
+        self.assert_default(w, "wymd")
+        self.assertEqual(w.hours, set(range(0, 24)))
+        self.assertEqual(w.minutes, set(range(0, 60)))
+        self.assertEqual(w.seconds, {0})
+
 
 class TestValidation(unittest.TestCase):
     def test_it_rejects_4_components(self) -> None:

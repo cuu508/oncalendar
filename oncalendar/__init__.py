@@ -31,6 +31,17 @@ FIELD_NAMES = [
     "minute",
     "second",
 ]
+SPECIALS = {
+    "minutely": "*-*-* *:*:00",
+    "hourly": "*-*-* *:00:00",
+    "daily": "*-*-* 00:00:00",
+    "monthly": "*-*-01 00:00:00",
+    "weekly": "Mon *-*-* 00:00:00",
+    "yearly": "*-01-01 00:00:00",
+    "annually": "*-01-01 00:00:00",
+    "quarterly": "*-01,04,07,10-01 00:00:00",
+    "semiannually": "*-01,07-01 00:00:00",
+}
 
 
 class OnCalendarError(Exception):
@@ -146,6 +157,9 @@ def is_imaginary(dt: datetime) -> bool:
 class OnCalendar(object):
     def __init__(self, expr: str, dt: datetime):
         self.dt = dt.replace(microsecond=0)
+
+        if expr in SPECIALS:
+            expr = SPECIALS[expr]
 
         # FIXME disallow "-~" in input
         expr = expr.replace("~", "-~")
