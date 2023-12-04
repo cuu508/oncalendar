@@ -5,7 +5,7 @@ from datetime import date, datetime, time
 from datetime import timedelta as td
 from datetime import timezone
 from enum import IntEnum
-from typing import Set
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 UTC = timezone.utc
 
@@ -71,6 +71,7 @@ class Field(IntEnum):
 
     def int(self, s: str) -> int:
         if self == Field.DOW:
+            s = s.upper()
             if s in SYMBOLIC_DAYS:
                 # Monday -> 0, ..., Sunday -> 6
                 return SYMBOLIC_DAYS.index(s)
@@ -92,7 +93,7 @@ class Field(IntEnum):
 
         return v
 
-    def parse(self, s: str, reverse: bool = False) -> Set[int]:
+    def parse(self, s: str, reverse: bool = False) -> set[int]:
         if s == "*":
             return set(RANGES[self])
 
@@ -163,7 +164,7 @@ class OnCalendar(object):
 
         # FIXME disallow "-~" in input
         expr = expr.replace("~", "-~")
-        parts = expr.upper().split()
+        parts = expr.split()
         # If weekday is missing, use default
         if "-" in parts[0] or ":" in parts[0]:
             parts.insert(0, "*")
@@ -394,3 +395,27 @@ class OnCalendar(object):
                 return result
 
             return self.dt
+
+
+def parse_tz(value) -> ZoneInfo | None:
+    try:
+        return ZoneInfo(value)
+    except ZoneInfoNotFoundError:
+        return None
+
+
+class OnCalendarTz(object):
+    def __init__(self, expr: str, dt: datetime):
+        if not dt.tzinfo:
+            raise OnCalendarError("Argument 'dt' must be timezone-aware")
+
+        self.local_tz = dt.tzinfo
+        if " " in expr:
+            head, maybe_tz = expr.rsplit(maxsplit=1)
+            if tz := parse_tz(maybe_tz):
+                expr, dt = head, dt.astimezone(tz)
+
+        self.iterator = OnCalendar(expr, dt)
+
+    def __next__(self) -> datetime:
+        return next(self.iterator).astimezone(self.local_tz)
