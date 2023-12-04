@@ -180,10 +180,15 @@ class TestValidation(unittest.TestCase):
 
     def test_it_checks_day_of_month_range(self) -> None:
         with self.assertRaisesRegex(OnCalendarError, "Bad day-of-month"):
-            OnCalendar("2-30", NOW)
+            OnCalendar("1-32", NOW)
 
+    def test_it_rejects_weekday_star(self) -> None:
+        with self.assertRaisesRegex(OnCalendarError, "Bad day-of-week"):
+            OnCalendar("* 1-1", NOW)
+
+    def test_it_rejects_reverse_dom_above_28(self) -> None:
         with self.assertRaisesRegex(OnCalendarError, "Bad day-of-month"):
-            OnCalendar("4-31", NOW)
+            OnCalendar("1~29", NOW)
 
 
 class TestIterator(unittest.TestCase):

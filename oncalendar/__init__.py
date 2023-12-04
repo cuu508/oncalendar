@@ -94,7 +94,7 @@ class Field(IntEnum):
         return v
 
     def parse(self, s: str, reverse: bool = False) -> set[int]:
-        if s == "*":
+        if s == "*" and self != Field.DOW:
             return set(RANGES[self])
 
         if self == Field.DOW and s.endswith(","):
@@ -145,7 +145,9 @@ class Field(IntEnum):
 
         v = self.int(s)
         if reverse:
-            # FIXME systemd has stricter range check, disallows values > 28
+            # When using <month>~<day> syntax, systemd rejects day values above 28
+            if v > 28:
+                raise OnCalendarError(self.msg())
             v = -v
 
         return {v}
@@ -167,7 +169,7 @@ class OnCalendar(object):
         parts = expr.split()
         # If weekday is missing, use default
         if "-" in parts[0] or ":" in parts[0]:
-            parts.insert(0, "*")
+            parts.insert(0, "Mon..Sun")
 
         # If date is missing, use default
         if len(parts) == 1 or "-" not in parts[1]:
