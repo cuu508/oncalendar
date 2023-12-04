@@ -202,11 +202,6 @@ class OnCalendar(object):
         self.minutes = Field.MINUTE.parse(time_parts[1])
         self.seconds = Field.SECOND.parse(time_parts[2])
 
-        if len(self.days) and min(self.days) > 29:
-            # Check if we have any month with enough days
-            if min(self.days) > max(DAYS_IN_MONTH[month] for month in self.months):
-                raise OnCalendarError(Field.DAY.msg())
-
         self.fixup_tz = None
         if self.dt.tzinfo in (None, UTC):
             # No special DST handling for UTC
