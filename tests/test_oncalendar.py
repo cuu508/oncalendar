@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 from datetime import datetime
 from itertools import product
+from zoneinfo import ZoneInfo
 
 from oncalendar import OnCalendar, OnCalendarError
 
@@ -207,6 +208,33 @@ class TestIterator(unittest.TestCase):
         self.assertEqual(next(it).isoformat(), "2020-01-26T00:00:00")
         self.assertEqual(next(it).isoformat(), "2020-02-23T00:00:00")
         self.assertEqual(next(it).isoformat(), "2020-03-29T00:00:00")
+
+
+class TestDstHandling(unittest.TestCase):
+    tz = ZoneInfo("Europe/Riga")
+
+    def test_it_preserves_timezone(self) -> None:
+        now = datetime(2020, 1, 1, tzinfo=self.tz)
+
+        it = OnCalendar("*:*", now)
+        self.assertEqual(next(it).isoformat(), "2020-01-01T00:01:00+02:00")
+        self.assertEqual(next(it).isoformat(), "2020-01-01T00:02:00+02:00")
+
+    def test_it_handles_spring_dst(self) -> None:
+        now = datetime(2020, 1, 1, tzinfo=self.tz)
+
+        it = OnCalendar("*-*-29 3:30", now)
+        self.assertEqual(next(it).isoformat(), "2020-01-29T03:30:00+02:00")
+        self.assertEqual(next(it).isoformat(), "2020-02-29T03:30:00+02:00")
+        self.assertEqual(next(it).isoformat(), "2020-04-29T03:30:00+03:00")
+
+    def test_it_handles_autumn_dst(self) -> None:
+        now = datetime(2020, 10, 1, tzinfo=self.tz)
+
+        it = OnCalendar("*-*-25 3:30", now)
+        self.assertEqual(next(it).isoformat(), "2020-10-25T03:30:00+03:00")
+        self.assertEqual(next(it).isoformat(), "2020-11-25T03:30:00+02:00")
+        self.assertEqual(next(it).isoformat(), "2020-12-25T03:30:00+02:00")
 
 
 if __name__ == "__main__":

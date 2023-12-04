@@ -385,8 +385,12 @@ class OnCalendar(object):
                 continue
 
             if self.fixup_tz:
-                # FIXME: switch timezone to fixup_tz, and continue search if
-                # this results in an imaginary datetime
-                pass
+                result = self.dt.replace(tzinfo=self.fixup_tz, fold=0)
+                if is_imaginary(result):
+                    # If we hit an imaginary datetime then look for the next
+                    # occurence
+                    self.tick(seconds=1)
+                    continue
+                return result
 
             return self.dt

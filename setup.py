@@ -18,7 +18,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     platforms="any",
-    python_requires=">= 3.8",
+    python_requires=">= 3.10",
     zip_safe=False,
     project_urls={
         "Changelog": "https://github.com/cuu508/oncalendar/blob/main/CHANGELOG.md"
