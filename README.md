@@ -4,14 +4,20 @@ A systemd OnCalendar expression parser and evaluator. Requires Python 3.10+.
 
 Alpha, work in progress.
 
-This package provides two classes:
+This package provides three classes:
 
-* `oncalendar.BaseIterator`: supports expressions without timezone
+* **oncalendar.BaseIterator**: supports expressions without timezone
   (example: "Mon, 12:34"). Accepts both naive and timezone-aware datetimes
   as the start time.
-* `oncalendar.TzIterator`: supports expressions with and without timezone.
+* **oncalendar.TzIterator**: supports expressions with and without timezone.
   (example: "Mon, 12:34 Europe/Riga"). Requires the start datetime to be timezone-aware.
+* **oncalendar.OnCalendar**: supports multiple expressions with or without timezones,
+  separated by newlines. Requires the start datetime to be timezone-aware. Example:
 
+  ```
+  2020-01-01
+  12:34 Europe/Riga
+  ```
 
 ## Usage
 

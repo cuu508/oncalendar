@@ -361,12 +361,12 @@ class BaseIterator(object):
         self.dt += SECOND
 
         while True:
+            # print(f"{self.dt.isoformat()=}")
+            self.advance_year()
+
             # systemd seems to generate dates up to 2200, so we do the same
             if self.dt.year >= MAX_YEAR:
                 raise StopIteration
-
-            # print(f"{self.dt.isoformat()=}")
-            self.advance_year()
 
             if self.advance_month():
                 continue
@@ -421,3 +421,30 @@ class TzIterator(object):
 
     def __next__(self) -> datetime:
         return next(self.iterator).astimezone(self.local_tz)
+
+
+class OnCalendar(object):
+    def __init__(self, expressions: str, dt: datetime):
+        if not dt.tzinfo:
+            raise OnCalendarError("Argument 'dt' must be timezone-aware")
+
+        self.dt = dt
+        self.iterators = {}
+        for expr in expressions.strip().split("\n"):
+            self.iterators[TzIterator(expr, dt.replace())] = dt
+
+    def __next__(self) -> datetime:
+        for it in list(self.iterators.keys()):
+            if self.iterators[it] > self.dt:
+                continue
+
+            try:
+                self.iterators[it] = next(it)
+            except StopIteration:
+                del self.iterators[it]
+
+        if not self.iterators:
+            raise StopIteration
+
+        self.dt = min(self.iterators.values())
+        return self.dt

@@ -219,6 +219,11 @@ class TestIterator(unittest.TestCase):
         self.assertEqual(next(it).isoformat(), "2020-02-23T00:00:00")
         self.assertEqual(next(it).isoformat(), "2020-03-29T00:00:00")
 
+    def test_it_handles_no_occurences(self) -> None:
+        it = BaseIterator("2019-01-01", NOW)
+        with self.assertRaises(StopIteration):
+            print(next(it))
+
 
 class TestDstHandling(unittest.TestCase):
     tz = ZoneInfo("Europe/Riga")
