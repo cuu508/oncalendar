@@ -395,6 +395,10 @@ class OnCalendar(object):
 
 
 def parse_tz(value) -> ZoneInfo | None:
+    # Optimization: there are no timezones that start with a digit or star
+    if value[0] in "0123456789*":
+        return None
+
     try:
         return ZoneInfo(value)
     except ZoneInfoNotFoundError:

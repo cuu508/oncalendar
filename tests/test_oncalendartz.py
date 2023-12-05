@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 from datetime import datetime, timezone
+from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
 from oncalendar import OnCalendarError, OnCalendarTz
@@ -38,6 +39,20 @@ class TestOnCalendarTz(unittest.TestCase):
         now = datetime(2020, 1, 1, tzinfo=timezone.utc)
         with self.assertRaises(OnCalendarError):
             OnCalendarTz("12:34 Europe/Surprise", now)
+
+    def test_it_avoids_zoneinfo_inits(self) -> None:
+        now = datetime(2020, 1, 1, tzinfo=timezone.utc)
+        # Schedules where we can determine the last component is *not*
+        # a timezone without calling ZoneInfo()
+        samples = (
+            "*-* *:*",  # no timezone contains ":"
+            "Mon 1-10",  # no timezone starts with a digit
+            "Mon *-10",  # no timezone starts with a star
+        )
+        for sample in samples:
+            with patch("oncalendar.ZoneInfo", return_value=None) as mock:
+                OnCalendarTz(sample, now)
+                self.assertFalse(mock.called)
 
 
 if __name__ == "__main__":
