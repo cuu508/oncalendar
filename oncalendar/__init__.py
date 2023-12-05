@@ -167,9 +167,7 @@ class OnCalendar(object):
         if expr in SPECIALS:
             expr = SPECIALS[expr]
 
-        # FIXME disallow "-~" in input
-        expr = expr.replace("~", "-~")
-        parts = expr.split()
+        parts = expr.replace("~", "-~").split()
         # If weekday is missing, use default
         if "-" in parts[0] or ":" in parts[0]:
             parts.insert(0, "Mon..Sun")

@@ -160,7 +160,7 @@ class TestValidation(unittest.TestCase):
             "*:*:%s",
         )
 
-        bad_values = ("-1", "1000", "ABC", "1-1", "1:1", "Mon/1")
+        bad_values = ("-1", "1000", "ABC", "1-1", "1:1", "Mon/1", "~1")
 
         for pattern, s in product(patterns, bad_values):
             with self.assertRaises(OnCalendarError):
