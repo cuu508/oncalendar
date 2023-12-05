@@ -2,24 +2,24 @@
 
 A systemd OnCalendar expression parser and evaluator. Requires Python 3.10+.
 
-Pre-alpha, work in progress.
+Alpha, work in progress.
 
 This package provides two classes:
 
-* `oncalendar.OnCalendar`: supports expressions without timezone.
-  Example: "Mon, 12:34". Accepts both naive and timezone-aware datetimes
+* `oncalendar.BaseIterator`: supports expressions without timezone
+  (example: "Mon, 12:34"). Accepts both naive and timezone-aware datetimes
   as the start time.
-* `oncalendar.OnCalendarTz`: supports expressions with and without timezone.
-  Requires the start datetime to be timezone-aware. Example: "Mon, 12:34 Europe/Riga".
+* `oncalendar.TzIterator`: supports expressions with and without timezone.
+  (example: "Mon, 12:34 Europe/Riga"). Requires the start datetime to be timezone-aware.
 
 
 ## Usage
 
 ```python
 from datetime import datetime
-from oncalendar import OnCalendar
+from oncalendar import BaseIterator
 
-it = OnCalendar("Mon, 12:34", datetime.now())
+it = BaseIterator("Mon, 12:34", datetime.now())
 for x in range(0, 10):
     print(next(it))
 ```
@@ -44,9 +44,9 @@ exception:
 
 ```python
 from datetime import datetime
-from oncalendar import OnCalendar
+from oncalendar import BaseIterator
 
-OnCalendar("Mon, 123:456", datetime.now())
+BaseIterator("Mon, 123:456", datetime.now())
 ```
 
 Produces:
@@ -60,10 +60,10 @@ If oncalendar hits year 2200 while iterating, it stops iteration by raising
 
 ```python
 from datetime import datetime
-from oncalendar import OnCalendar
+from oncalendar import BaseIterator
 
 # 2199 is not leap year, and we stop at 2200
-print(next(OnCalendar("2199-2-29", datetime.now())))
+print(next(BaseIterator("2199-2-29", datetime.now())))
 ```
 
 Produces:

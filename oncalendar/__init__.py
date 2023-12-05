@@ -160,7 +160,7 @@ def is_imaginary(dt: datetime) -> bool:
     return dt != dt.astimezone(UTC).astimezone(dt.tzinfo)
 
 
-class OnCalendar(object):
+class BaseIterator(object):
     def __init__(self, expr: str, dt: datetime):
         self.dt = dt.replace(microsecond=0)
 
@@ -406,7 +406,7 @@ def parse_tz(value) -> ZoneInfo | None:
         return None
 
 
-class OnCalendarTz(object):
+class TzIterator(object):
     def __init__(self, expr: str, dt: datetime):
         if not dt.tzinfo:
             raise OnCalendarError("Argument 'dt' must be timezone-aware")
@@ -417,7 +417,7 @@ class OnCalendarTz(object):
             if tz := parse_tz(maybe_tz):
                 expr, dt = head, dt.astimezone(tz)
 
-        self.iterator = OnCalendar(expr, dt)
+        self.iterator = BaseIterator(expr, dt)
 
     def __next__(self) -> datetime:
         return next(self.iterator).astimezone(self.local_tz)
