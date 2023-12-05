@@ -168,42 +168,45 @@ class OnCalendar(object):
             expr = SPECIALS[expr]
 
         parts = expr.replace("~", "-~").split()
-        # If weekday is missing, use default
-        if "-" in parts[0] or ":" in parts[0]:
-            parts.insert(0, "Mon..Sun")
+        if ":" in parts[-1]:
+            time_parts = parts.pop().split(":")
+            if len(time_parts) not in (2, 3):
+                raise OnCalendarError("Bad time")
+            if len(time_parts) == 2:
+                # If seconds is missing, use default
+                time_parts.append("0")
+            self.hours = Field.HOUR.parse(time_parts[0])
+            self.minutes = Field.MINUTE.parse(time_parts[1])
+            self.seconds = Field.SECOND.parse(time_parts[2])
+        else:
+            # Default: 00:00:00
+            self.hours, self.minutes, self.seconds = {0}, {0}, {0}
 
-        # If date is missing, use default
-        if len(parts) == 1 or "-" not in parts[1]:
-            parts.insert(1, "*-*-*")
+        if parts and "-" in parts[-1]:
+            date_parts = parts.pop().split("-")
+            if len(date_parts) not in (2, 3):
+                raise OnCalendarError("Bad date")
+            if len(date_parts) == 2:
+                # If year is missing, use default
+                date_parts.insert(0, "*")
+            self.years = Field.YEAR.parse(date_parts[0])
+            self.months = Field.MONTH.parse(date_parts[1])
+            self.days = Field.DAY.parse(date_parts[2])
+        else:
+            # Default: *-*-*
+            self.years = set(RANGES[Field.YEAR])
+            self.months = set(RANGES[Field.MONTH])
+            self.days = set(RANGES[Field.DAY])
 
-        # If time is missing, use default
-        if len(parts) == 2 or ":" not in parts[2]:
-            parts.insert(2, "0:0:0")
+        if parts:
+            self.weekdays = Field.DOW.parse(parts.pop(0))
+        else:
+            # Default: Mon..Sun
+            self.weekdays = set(RANGES[Field.DOW])
 
-        if len(parts) != 3:
+        # There should be no parts left over
+        if parts:
             raise OnCalendarError("Wrong number of fields")
-
-        self.weekdays = Field.DOW.parse(parts[0])
-
-        date_parts = parts[1].split("-")
-        # If year is missing, use default
-        if len(date_parts) == 2:
-            date_parts.insert(0, "*")
-        if len(date_parts) != 3:
-            raise OnCalendarError("Bad date")
-        self.years = Field.YEAR.parse(date_parts[0])
-        self.months = Field.MONTH.parse(date_parts[1])
-        self.days = Field.DAY.parse(date_parts[2])
-
-        time_parts = parts[2].split(":")
-        # If seconds is missing, use default
-        if len(time_parts) == 2:
-            time_parts.append("0")
-        if len(time_parts) != 3:
-            raise OnCalendarError("Bad time")
-        self.hours = Field.HOUR.parse(time_parts[0])
-        self.minutes = Field.MINUTE.parse(time_parts[1])
-        self.seconds = Field.SECOND.parse(time_parts[2])
 
         self.fixup_tz = None
         if self.dt.tzinfo in (None, UTC):
