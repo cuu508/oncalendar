@@ -192,6 +192,11 @@ class TestValidation(unittest.TestCase):
 
 
 class TestIterator(unittest.TestCase):
+    def test_it_handles_every_5th_second(self) -> None:
+        it = OnCalendar("*:*:*/5", NOW)
+        self.assertEqual(next(it).isoformat(), "2020-01-01T00:00:05")
+        self.assertEqual(next(it).isoformat(), "2020-01-01T00:00:10")
+
     def test_it_handles_every_minute(self) -> None:
         it = OnCalendar("*:*", NOW)
         self.assertEqual(next(it).isoformat(), "2020-01-01T00:01:00")

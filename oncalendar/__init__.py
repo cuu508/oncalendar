@@ -42,6 +42,9 @@ SPECIALS = {
     "quarterly": "*-01,04,07,10-01 00:00:00",
     "semiannually": "*-01,07-01 00:00:00",
 }
+SECOND = td(seconds=1)
+MINUTE = td(minutes=1)
+HOUR = td(hours=1)
 
 
 class OnCalendarError(Exception):
@@ -212,10 +215,7 @@ class OnCalendar(object):
             self.fixup_tz = self.dt.tzinfo
             self.dt = self.dt.replace(tzinfo=None)
 
-    def tick(self, minutes: int = 0, seconds: int = 0) -> None:
-        """Roll self.dt forward by 1 or more minutes and fix timezone."""
-
-        self.dt += td(minutes=minutes, seconds=seconds)
+        self.any_reverse_day = any(d < 0 for d in self.days)
 
     def advance_second(self) -> bool:
         """Roll forward the second component until it satisfies the constraints.
@@ -233,10 +233,10 @@ class OnCalendar(object):
             # one element. Instead of advancing one second per iteration,
             # make a jump from the current second to the target second.
             delta = (next(iter(self.seconds)) - self.dt.second) % 60
-            self.tick(seconds=delta)
+            self.dt += td(seconds=delta)
 
-        while self.dt.minute not in self.minutes:
-            self.tick(seconds=1)
+        while self.dt.second not in self.seconds:
+            self.dt += SECOND
             if self.dt.second == 0:
                 # Break out to re-check year, month, day, hour, and minute
                 break
@@ -256,7 +256,7 @@ class OnCalendar(object):
 
         self.dt = self.dt.replace(second=0)
         while self.dt.minute not in self.minutes:
-            self.tick(minutes=1)
+            self.dt += MINUTE
             if self.dt.minute == 0:
                 # Break out to re-check year, month, day and hour
                 break
@@ -276,7 +276,7 @@ class OnCalendar(object):
 
         self.dt = self.dt.replace(minute=0)
         while self.dt.hour not in self.hours:
-            self.tick(minutes=60)
+            self.dt += HOUR
             if self.dt.hour == 0:
                 # break out to re-check year, month and day
                 break
@@ -288,10 +288,10 @@ class OnCalendar(object):
         if d.day in self.days:
             return True
 
-        # FIXME this is likely a performance bottleneck
-        _, last = monthrange(d.year, d.month)
-        if d.day - last - 1 in self.days:
-            return True
+        if self.any_reverse_day:
+            _, last = monthrange(d.year, d.month)
+            if d.day - last - 1 in self.days:
+                return True
 
         return False
 
@@ -357,7 +357,7 @@ class OnCalendar(object):
         return self
 
     def __next__(self) -> datetime:
-        self.tick(seconds=1)
+        self.dt += SECOND
 
         while True:
             # systemd seems to generate dates up to 2200, so we do the same
@@ -387,7 +387,7 @@ class OnCalendar(object):
                 if is_imaginary(result):
                     # If we hit an imaginary datetime then look for the next
                     # occurence
-                    self.tick(seconds=1)
+                    self.dt += SECOND
                     continue
                 return result
 
