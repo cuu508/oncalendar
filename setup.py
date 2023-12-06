@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="oncalendar",
-    version="0.1",
+    version="1.0a1",
     url="https://github.com/cuu508/oncalendar",
     license="BSD",
     author="Pēteris Caune",
