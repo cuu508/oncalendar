@@ -161,13 +161,13 @@ def is_imaginary(dt: datetime) -> bool:
 
 
 class BaseIterator(object):
-    def __init__(self, expr: str, dt: datetime):
-        self.dt = dt.replace(microsecond=0)
+    def __init__(self, expression: str, start: datetime):
+        self.dt = start.replace(microsecond=0)
 
-        if expr in SPECIALS:
-            expr = SPECIALS[expr]
+        if expression in SPECIALS:
+            expression = SPECIALS[expression]
 
-        parts = expr.replace("~", "-~").split()
+        parts = expression.replace("~", "-~").split()
         if ":" in parts[-1]:
             time_parts = parts.pop().split(":")
             if len(time_parts) not in (2, 3):
@@ -407,31 +407,31 @@ def parse_tz(value) -> ZoneInfo | None:
 
 
 class TzIterator(object):
-    def __init__(self, expr: str, dt: datetime):
-        if not dt.tzinfo:
+    def __init__(self, expression: str, start: datetime):
+        if not start.tzinfo:
             raise OnCalendarError("Argument 'dt' must be timezone-aware")
 
-        self.local_tz = dt.tzinfo
-        if " " in expr:
-            head, maybe_tz = expr.rsplit(maxsplit=1)
+        self.local_tz = start.tzinfo
+        if " " in expression:
+            head, maybe_tz = expression.rsplit(maxsplit=1)
             if tz := parse_tz(maybe_tz):
-                expr, dt = head, dt.astimezone(tz)
+                expression, start = head, start.astimezone(tz)
 
-        self.iterator = BaseIterator(expr, dt)
+        self.iterator = BaseIterator(expression, start)
 
     def __next__(self) -> datetime:
         return next(self.iterator).astimezone(self.local_tz)
 
 
 class OnCalendar(object):
-    def __init__(self, expressions: str, dt: datetime):
-        if not dt.tzinfo:
+    def __init__(self, expressions: str, start: datetime):
+        if not start.tzinfo:
             raise OnCalendarError("Argument 'dt' must be timezone-aware")
 
-        self.dt = dt
+        self.dt = start
         self.iterators = {}
         for expr in expressions.strip().split("\n"):
-            self.iterators[TzIterator(expr, dt.replace())] = dt
+            self.iterators[TzIterator(expr, start.replace())] = start
 
     def __next__(self) -> datetime:
         for it in list(self.iterators.keys()):
