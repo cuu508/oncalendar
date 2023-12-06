@@ -1,0 +1,19 @@
+name: Tests
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Run tests
+      run: python -m unittest tests/test_*
+    - name: Run mypy
+      if: ${{ matrix.python-version == '3.10' }}
+      run: pip install mypy && mypy --strict oncalendar/

@@ -96,7 +96,7 @@ class Field(IntEnum):
 
         return v
 
-    def parse(self, s: str, reverse: bool = False) -> set[int]:
+    def parse(self, s: str, reverse: bool = False) -> set[__builtins__.int]:
         if s == "*" and self != Field.DOW:
             return set(RANGES[self])
 
@@ -354,9 +354,6 @@ class BaseIterator(object):
 
         self.dt = datetime.combine(needle, time(), tzinfo=self.dt.tzinfo)
 
-    def __iter__(self) -> "OnCalendar":
-        return self
-
     def __next__(self) -> datetime:
         self.dt += SECOND
 
@@ -395,7 +392,7 @@ class BaseIterator(object):
             return self.dt
 
 
-def parse_tz(value) -> ZoneInfo | None:
+def parse_tz(value: str) -> ZoneInfo | None:
     # Optimization: there are no timezones that start with a digit or star
     if value[0] in "0123456789*":
         return None
