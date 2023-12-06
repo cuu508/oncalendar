@@ -164,8 +164,8 @@ class BaseIterator(object):
     def __init__(self, expression: str, start: datetime):
         self.dt = start.replace(microsecond=0)
 
-        if expression in SPECIALS:
-            expression = SPECIALS[expression]
+        if expression.lower() in SPECIALS:
+            expression = SPECIALS[expression.lower()]
 
         parts = expression.replace("~", "-~").split()
         if ":" in parts[-1]:
