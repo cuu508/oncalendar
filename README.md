@@ -1,5 +1,7 @@
 # oncalendar
 
+[![Tests](https://github.com/cuu508/oncalendar/actions/workflows/pytest.yml/badge.svg)](https://github.com/cuu508/oncalendar/actions/workflows/pytest.yml)
+
 A systemd OnCalendar expression parser and evaluator. Requires Python 3.10+.
 
 Alpha, work in progress.
