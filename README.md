@@ -81,3 +81,7 @@ Produces:
 ```
 StopIteration
 ```
+
+## Known Limitations
+
+* Does not support decimals in the second field.

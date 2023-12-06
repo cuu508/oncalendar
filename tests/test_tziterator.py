@@ -9,8 +9,6 @@ from oncalendar import OnCalendarError, TzIterator
 
 
 class TestTzIterator(unittest.TestCase):
-    tz = ZoneInfo("Europe/Riga")
-
     def test_it_handles_no_timezone(self) -> None:
         now = datetime(2020, 1, 1, tzinfo=timezone.utc)
         for sample in ("12:34", "*-*-* 12:34"):

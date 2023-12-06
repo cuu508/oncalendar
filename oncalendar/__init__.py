@@ -275,7 +275,7 @@ class BaseIterator(object):
         if self.dt.hour in self.hours:
             return False
 
-        self.dt = self.dt.replace(minute=0)
+        self.dt = self.dt.replace(minute=0, second=0)
         while self.dt.hour not in self.hours:
             self.dt += HOUR
             if self.dt.hour == 0:
