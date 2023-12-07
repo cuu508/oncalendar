@@ -399,7 +399,7 @@ def parse_tz(value: str) -> ZoneInfo | None:
 
     try:
         return ZoneInfo(value)
-    except ZoneInfoNotFoundError:
+    except (ZoneInfoNotFoundError, ValueError):
         return None
 
 

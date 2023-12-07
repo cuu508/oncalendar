@@ -37,6 +37,8 @@ class TestTzIterator(unittest.TestCase):
         now = datetime(2020, 1, 1, tzinfo=timezone.utc)
         with self.assertRaises(OnCalendarError):
             TzIterator("12:34 Europe/Surprise", now)
+        with self.assertRaises(OnCalendarError):
+            TzIterator("12:34 Europe/", now)
 
     def test_it_avoids_zoneinfo_inits(self) -> None:
         now = datetime(2020, 1, 1, tzinfo=timezone.utc)
