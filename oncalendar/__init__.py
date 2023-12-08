@@ -172,6 +172,9 @@ class BaseIterator(object):
             expression = SPECIALS[expression.lower()]
 
         parts = expression.replace("~", "-~").split()
+        if not parts:
+            raise OnCalendarError("Wrong number of fields")
+
         if ":" in parts[-1]:
             time_parts = parts.pop().split(":")
             if len(time_parts) not in (2, 3):
@@ -413,6 +416,7 @@ class TzIterator(object):
             raise OnCalendarError("Argument 'dt' must be timezone-aware")
 
         self.local_tz = start.tzinfo
+        expression = expression.strip()
         if " " in expression:
             head, maybe_tz = expression.rsplit(maxsplit=1)
             if tz := parse_tz(maybe_tz):

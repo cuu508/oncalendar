@@ -151,6 +151,10 @@ class TestParse(unittest.TestCase):
 
 
 class TestValidation(unittest.TestCase):
+    def test_it_rejects_empty_string(self) -> None:
+        with self.assertRaisesRegex(OnCalendarError, "Wrong number of fields"):
+            BaseIterator("", NOW)
+
     def test_it_rejects_4_components(self) -> None:
         with self.assertRaisesRegex(OnCalendarError, "Wrong number of fields"):
             BaseIterator("Mon *-*-* *:*:* surprise", NOW)
