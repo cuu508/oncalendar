@@ -104,6 +104,10 @@ class Field(IntEnum):
             # Ignore trailing comma
             return self.parse(s[:-1])
 
+        if self == Field.DOW and "-" in s:
+            # Replace "-" with ".."
+            return self.parse(s.replace("-", ".."))
+
         if self == Field.DAY and s.startswith("~"):
             # Chop leading "~" and set the reverse flag
             return self.parse(s[1:], reverse=True)
@@ -182,7 +186,7 @@ class BaseIterator(object):
             # Default: 00:00:00
             self.hours, self.minutes, self.seconds = {0}, {0}, {0}
 
-        if parts and "-" in parts[-1]:
+        if parts and "-" in parts[-1] and parts[-1][0] in "0123456789*":
             date_parts = parts.pop().split("-")
             if len(date_parts) not in (2, 3):
                 raise OnCalendarError("Bad date")

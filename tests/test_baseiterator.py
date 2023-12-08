@@ -47,6 +47,12 @@ class TestParse(unittest.TestCase):
         self.assertEqual(w.hours, {12})
         self.assertEqual(w.minutes, {34})
 
+    def test_it_parses_weekday_interval(self) -> None:
+        for sample in ("Mon..Tue", "Mon,Tue", "Mon-Tue"):
+            w = BaseIterator(sample, NOW)
+            self.assert_default(w, "ymdHMS")
+            self.assertEqual(w.weekdays, {0, 1})
+
     def test_it_parses_date(self) -> None:
         w = BaseIterator("2023-11-30", NOW)
         self.assert_default(w, "wHMS")
