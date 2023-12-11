@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 UTC = timezone.utc
 
+# systemd seems to stop iteration when it reaches year 2200. We do the same.
 MAX_YEAR = 2200
 RANGES = [
     range(0, 7),
@@ -42,6 +43,8 @@ SPECIALS = {
     "quarterly": "*-01,04,07,10-01 00:00:00",
     "semiannually": "*-01,07-01 00:00:00",
 }
+# timedelta initialization is not cheap so we prepare a few constants
+# that we will need often:
 SECOND = td(seconds=1)
 MINUTE = td(minutes=1)
 HOUR = td(hours=1)
@@ -66,6 +69,8 @@ class Field(IntEnum):
     def _int(self, value: str) -> int:
         if value == "":
             raise OnCalendarError(self.msg())
+        # Make sure the value contains digits and nothing else
+        # (for example, we reject integer literals with underscores)
         for ch in value:
             if ch not in "0123456789":
                 raise OnCalendarError(self.msg())
@@ -73,6 +78,17 @@ class Field(IntEnum):
         return int(value)
 
     def int(self, s: str) -> int:
+        """Convert the supplied sting to an integer.
+
+        This function handles a few special cases:
+        * It converts weekdays "Mon", "Tue", ..., "Sun" to 0, 1, ..., 6
+        * It converts years 70 .. 99 to 1970 - 1999
+        * It converts years 0 .. 69 to 2000 - 2069
+
+        It also checks if the resulting integer is within the range
+        of valid values for the given field, and raises `OnCalendarError`
+        if it is not.
+        """
         if self == Field.DOW:
             s = s.upper()
             if s in SYMBOLIC_DAYS:
@@ -97,6 +113,11 @@ class Field(IntEnum):
         return v
 
     def parse(self, s: str, reverse: bool = False) -> set[__builtins__.int]:
+        """Parse a single component of an expression into a set of integers.
+
+        To handle lists, intervals, and intervals with a step, this function
+        recursively calls itself.
+        """
         if self == Field.DAY and s.startswith("~"):
             # Chop leading "~" and set the reverse flag
             return self.parse(s[1:], reverse=True)
@@ -168,11 +189,42 @@ class Field(IntEnum):
 
 
 def is_imaginary(dt: datetime) -> bool:
+    """Return True if dt gets skipped over during DST transition."""
     return dt != dt.astimezone(UTC).astimezone(dt.tzinfo)
 
 
 class BaseIterator(object):
+    """OnCalendar expression parser and iterator.
+
+    This iterator supports most syntax features supported by systemd. It however
+    does *not* support:
+
+    * Timezone specified within the expression (use `TzIterator` instead).
+    * Seconds fields with decimal values.
+
+    This iterator works with both naive and timezone-aware datetimes. In case
+    of timezone-aware datetimes, it mimics systemd behaviour during DST transitions:
+
+    * It skips over datetimes that fall in the skipped hour during the spring DST
+      transition.
+    * It repeats the datetimes that fall in the repeated hour during the fall DST
+      transition. It returns a datetime with the pre-transition timezone,
+      then the same datetime but with the post-transition timezone.
+    """
+
     def __init__(self, expression: str, start: datetime):
+        """Initialize the iterator with an OnCalendar expression and the start time.
+
+        `expression` should contain a single OnCalendar expression without a timezone,
+        for example: `Mon 01-01 12:00:00`.
+
+        `start` is the datetime to start iteration from. The first result
+        returned by the iterator will be greater than `start`. The supplied
+        datetime can be either naive or timezone-aware. If `start` is naive,
+        the iterator will also return naive datetimes. If `start` is timezone-aware,
+        the iterator will return timezone-aware datetimes using the same timezone
+        as `start`.
+        """
         self.dt = start.replace(microsecond=0)
 
         if expression.lower() in SPECIALS:
@@ -359,6 +411,13 @@ class BaseIterator(object):
         return True
 
     def advance_year(self) -> None:
+        """Roll forward the year component until it satisfies the constraints.
+
+        Return False if the year meets contraints without modification.
+        Return True if self.dt was rolled forward.
+
+        """
+
         if self.dt.year in self.years:
             return
 
@@ -407,6 +466,7 @@ class BaseIterator(object):
 
 
 def parse_tz(value: str) -> ZoneInfo | None:
+    """Return ZoneInfo object or None if value fails to parse."""
     # Optimization: there are no timezones that start with a digit or star
     if value[0] in "0123456789*":
         return None
@@ -418,7 +478,22 @@ def parse_tz(value: str) -> ZoneInfo | None:
 
 
 class TzIterator(object):
+    """OnCalendar expression parser and iterator (with timezone support).
+
+    This iterator wraps `BaseIterator` and adds support for timezones within
+    the expression. This iterator requires the starting datetime to be
+    timezone-aware.
+    """
+
     def __init__(self, expression: str, start: datetime):
+        """Initialize the iterator with an OnCalendar expression and the start time.
+
+        `expression` should contain a single OnCalendar expression with or without a
+        timezone, for example: `Mon 01-01 12:00:00 Europe/Riga`.
+
+        `start` is the timezone-aware datetime to start iteration from. The iterator
+        will return datetimes using the same timezone as `start`.
+        """
         if not start.tzinfo:
             raise OnCalendarError("Argument 'dt' must be timezone-aware")
 
@@ -436,7 +511,22 @@ class TzIterator(object):
 
 
 class OnCalendar(object):
+    """OnCalendar expression parser and iterator (with multiple expression support).
+
+    This iterator wraps `TzIterator` and adds support for iterating over multiple
+    expressions (separated by newlines) at once.
+    """
+
     def __init__(self, expressions: str, start: datetime):
+        """Initialize the iterator with OnCalendar expression(s) and the start time.
+
+        `expressions` should contain one or more OnCalendar expressions with or without
+        a timezone, separated with newlines. Example:
+        `00:00 Europe/Riga\n00:00 UTC`.
+
+        `start` is the timezone-aware datetime to start iteration from. The iterator
+        will return datetimes using the same timezone as `start`.
+        """
         if not start.tzinfo:
             raise OnCalendarError("Argument 'dt' must be timezone-aware")
 
