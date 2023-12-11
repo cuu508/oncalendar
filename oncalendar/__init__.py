@@ -97,20 +97,27 @@ class Field(IntEnum):
         return v
 
     def parse(self, s: str, reverse: bool = False) -> set[__builtins__.int]:
-        if s == "*" and self != Field.DOW:
-            return set(RANGES[self])
-
-        if self == Field.DOW and s.endswith(","):
-            # Ignore trailing comma
-            return self.parse(s[:-1])
-
-        if self == Field.DOW and "-" in s:
-            # Replace "-" with ".."
-            return self.parse(s.replace("-", ".."))
-
         if self == Field.DAY and s.startswith("~"):
             # Chop leading "~" and set the reverse flag
             return self.parse(s[1:], reverse=True)
+
+        if self != Field.DOW and s == "*":
+            return set(RANGES[self])
+
+        if "*" in s:
+            # systemd's OnCalendar syntax does not allow '*' to appear in
+            # comma-delimited lists, in intervals, or in intervals with step.
+            raise OnCalendarError(self.msg())
+
+        if self == Field.DOW and s.endswith(","):
+            # systemd allows both "Mon 1-1" and "Mon, 1-1". forms, and normalizes
+            # to the form without trailing comma. We do the same.
+            return self.parse(s[:-1])
+
+        if self == Field.DOW and "-" in s:
+            # For the weekday component, systemd allows both the "Mon..Fri" and
+            # the "Mon-Fri" forms. It normalizes "-" to ".." and we do the same.
+            return self.parse(s.replace("-", ".."))
 
         if "," in s:
             result = set()

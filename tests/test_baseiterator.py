@@ -102,7 +102,7 @@ class TestParse(unittest.TestCase):
         self.assertEqual(w.minutes, {1, 2, 3, 7, 8, 9})
 
     def test_it_parses_step(self) -> None:
-        w = BaseIterator("*:*/15", NOW)
+        w = BaseIterator("*:0/15", NOW)
         self.assertEqual(w.minutes, {0, 15, 30, 45})
 
     def test_it_parses_interval_with_step(self) -> None:
@@ -171,7 +171,18 @@ class TestValidation(unittest.TestCase):
             "*:*:%s",
         )
 
-        bad_values = ("-1", "1000", "ABC", "1-1", "1:1", "Mon/1", "~1")
+        bad_values = (
+            "-1",
+            "1000",
+            "ABC",
+            "1-1",
+            "1:1",
+            "Mon/1",
+            "~1",
+            "*/1",
+            "*,1",
+            "1..*",
+        )
 
         for pattern, s in product(patterns, bad_values):
             with self.assertRaises(OnCalendarError):
@@ -204,7 +215,7 @@ class TestValidation(unittest.TestCase):
 
 class TestIterator(unittest.TestCase):
     def test_it_handles_every_5th_second(self) -> None:
-        it = BaseIterator("*:*:*/5", NOW)
+        it = BaseIterator("*:*:0/5", NOW)
         self.assertEqual(next(it).isoformat(), "2020-01-01T00:00:05")
         self.assertEqual(next(it).isoformat(), "2020-01-01T00:00:10")
 
