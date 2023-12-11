@@ -22,6 +22,12 @@ This package provides three iterators:
   12:34 Europe/Riga
   ```
 
+## Installation
+
+```
+pip install oncalendar
+```
+
 ## Usage
 
 ```python
