@@ -5,8 +5,6 @@
 A systemd [OnCalendar expression](https://www.man7.org/linux/man-pages/man7/systemd.time.7.html#CALENDAR_EVENTS)
 parser and evaluator. Requires Python 3.10+.
 
-Alpha, work in progress.
-
 This package provides three iterators:
 
 * **oncalendar.BaseIterator(expression: str, start: datime)**: supports expressions
