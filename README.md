@@ -5,6 +5,9 @@
 A systemd [OnCalendar expression](https://www.man7.org/linux/man-pages/man7/systemd.time.7.html#CALENDAR_EVENTS)
 parser and evaluator. Requires Python 3.10+.
 
+oncalendar is written for and being used in [Healthchecks](https://github.com/healthchecks/healthchecks/)
+(a scheduled task monitoring service).
+
 This package provides three iterators:
 
 * **oncalendar.BaseIterator(expression: str, start: datime)**: supports expressions
