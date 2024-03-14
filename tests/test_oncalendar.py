@@ -18,6 +18,13 @@ class TestTzIterator(unittest.TestCase):
         self.assertEqual(next(it).isoformat(), "2020-01-02T12:34:00+00:00")
         self.assertEqual(next(it).isoformat(), "2020-01-03T00:00:00+00:00")
 
+    def test_it_works_as_iterator(self) -> None:
+        now = datetime(2020, 1, 1, tzinfo=timezone.utc)
+        hits = list(OnCalendar("2020-01-01 8..9:0:0", now))
+        self.assertEqual(len(hits), 2)
+        self.assertEqual(hits[0].isoformat(), "2020-01-01T08:00:00+00:00")
+        self.assertEqual(hits[1].isoformat(), "2020-01-01T09:00:00+00:00")
+
     def test_it_requires_aware_datetime(self) -> None:
         now = datetime(2020, 1, 1)
         with self.assertRaises(OnCalendarError):

@@ -11,6 +11,12 @@ NOW = datetime(2020, 1, 1, tzinfo=timezone.utc)
 
 
 class TestTzIterator(unittest.TestCase):
+    def test_it_works_as_iterator(self) -> None:
+        hits = list(TzIterator("2020-01-01 8..9:0:0", NOW))
+        self.assertEqual(len(hits), 2)
+        self.assertEqual(hits[0].isoformat(), "2020-01-01T08:00:00+00:00")
+        self.assertEqual(hits[1].isoformat(), "2020-01-01T09:00:00+00:00")
+
     def test_it_handles_no_timezone(self) -> None:
         for sample in ("12:34", "*-*-* 12:34"):
             it = TzIterator(sample, NOW)

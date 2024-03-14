@@ -214,6 +214,12 @@ class TestValidation(unittest.TestCase):
 
 
 class TestIterator(unittest.TestCase):
+    def test_it_works_as_iterator(self) -> None:
+        hits = list(BaseIterator("2020-01-01 8..9:0:0", NOW))
+        self.assertEqual(len(hits), 2)
+        self.assertEqual(hits[0].isoformat(), "2020-01-01T08:00:00")
+        self.assertEqual(hits[1].isoformat(), "2020-01-01T09:00:00")
+
     def test_it_handles_every_5th_second(self) -> None:
         it = BaseIterator("*:*:0/5", NOW)
         self.assertEqual(next(it).isoformat(), "2020-01-01T00:00:05")
