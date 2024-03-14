@@ -427,7 +427,7 @@ class BaseIterator(object):
 
         self.dt = datetime.combine(needle, time(), tzinfo=self.dt.tzinfo)
 
-    def __iter__(self):
+    def __iter__(self) -> "BaseIterator":
         return self
 
     def __next__(self) -> datetime:
@@ -509,7 +509,7 @@ class TzIterator(object):
 
         self.iterator = BaseIterator(expression, start)
 
-    def __iter__(self):
+    def __iter__(self) -> "TzIterator":
         return self
 
     def __next__(self) -> datetime:
@@ -541,7 +541,7 @@ class OnCalendar(object):
         for expr in expressions.strip().split("\n"):
             self.iterators[TzIterator(expr, start.replace())] = start
 
-    def __iter__(self):
+    def __iter__(self) -> "OnCalendar":
         return self
 
     def __next__(self) -> datetime:
