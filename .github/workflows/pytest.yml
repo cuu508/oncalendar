@@ -16,5 +16,5 @@ jobs:
     - name: Run tests
       run: python -m unittest tests/test_*
     - name: Run mypy
-      if: ${{ matrix.python-version == '3.10' }}
+      if: ${{ matrix.python-version == '3.14' }}
       run: pip install mypy && mypy --strict oncalendar/

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oncalendar"
+version = "1.2"
+authors = [{ name = "Pēteris Caune", email = "cuu508@monkeyseemonkeydo.lv" }]
+license = "BSD-3-Clause"
+description = "Systemd OnCalendar expression parser and evaluator"
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["systemd","oncalendar","calendar","schedule"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Repository = "https://github.com/cuu508/oncalendar.git"
+Issues = "https://github.com/cuu508/oncalendar/issues"
+Changelog = "https://github.com/cuu508/oncalendar/blob/main/CHANGELOG.md"
+
+[tool.setuptools]
+packages = ["oncalendar"]
