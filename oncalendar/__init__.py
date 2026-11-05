@@ -284,6 +284,14 @@ class BaseIterator(object):
 
         self.any_reverse_day = any(d < 0 for d in self.days)
 
+        self.never = False
+        if min(self.days) > 29:
+            # Optimization for the special case where no months have enough
+            # days for the expression to ever match. Set the self.never flag
+            # which tells the iterator to exit early.
+            if min(self.days) > max(DAYS_IN_MONTH[month] for month in self.months):
+                self.never = True
+
     def advance_second(self) -> bool:
         """Roll forward the second component until it satisfies the constraints.
 
@@ -431,10 +439,11 @@ class BaseIterator(object):
         return self
 
     def __next__(self) -> datetime:
-        self.dt += SECOND
+        if self.never:
+            raise StopIteration
 
+        self.dt += SECOND
         while True:
-            # print(f"{self.dt.isoformat()=}")
             self.advance_year()
 
             # systemd seems to generate dates up to 2200, so we do the same

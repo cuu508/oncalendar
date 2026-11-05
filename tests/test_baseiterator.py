@@ -252,6 +252,11 @@ class TestIterator(unittest.TestCase):
         with self.assertRaises(StopIteration):
             print(next(it))
 
+    def test_it_handles_feb_30(self) -> None:
+        it = BaseIterator("*-2-30", NOW)
+        with self.assertRaises(StopIteration):
+            print(next(it))
+
     def test_it_handles_midnight(self) -> None:
         it = BaseIterator("00:00", NOW.replace(hour=1))
         self.assertEqual(next(it).isoformat(), "2020-01-02T00:00:00")
